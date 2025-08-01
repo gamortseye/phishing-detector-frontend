@@ -1,0 +1,116 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+  <meta charset="UTF-8">
+  <title>AI Phishing Detector</title>
+  <style>
+    body {
+      font-family: Arial, sans-serif;
+      background: #f5f7fa;
+      display: flex;
+      justify-content: center;
+      align-items: center;
+      height: 100vh;
+      margin: 0;
+    }
+    .container {
+      background: white;
+      padding: 20px;
+      border-radius: 12px;
+      box-shadow: 0px 4px 10px rgba(0,0,0,0.1);
+      text-align: center;
+      width: 400px;
+    }
+    textarea {
+      width: 100%;
+      height: 100px;
+      margin: 10px 0;
+      padding: 10px;
+      border-radius: 8px;
+      border: 1px solid #ccc;
+      resize: none;
+    }
+    button {
+      padding: 10px 20px;
+      border: none;
+      background: #0077cc;
+      color: white;
+      border-radius: 8px;
+      cursor: pointer;
+      font-size: 15px;
+    }
+    button:hover {
+      background: #005fa3;
+    }
+    .result-card {
+      margin-top: 20px;
+      padding: 15px;
+      border-radius: 8px;
+      font-weight: bold;
+    }
+    .safe {
+      background: #e6ffed;
+      color: #0a7d0a;
+      border: 1px solid #0a7d0a;
+    }
+    .phishing {
+      background: #ffe6e6;
+      color: #a10000;
+      border: 1px solid #a10000;
+    }
+  </style>
+</head>
+<body>
+  <div class="container">
+    <h1>AI Phishing Message Detector</h1>
+    <textarea id="message" placeholder="Paste the message here..."></textarea>
+    <button onclick="checkMessage()">Check Message</button>
+    <div id="result"></div>
+  </div>
+
+  <script>
+    async function checkMessage() {
+      const message = document.getElementById("message").value;
+      const resultDiv = document.getElementById("result");
+      
+      if (!message) {
+        resultDiv.innerHTML = "⚠️ Please enter a message!";
+        return;
+      }
+      
+      resultDiv.innerHTML = "⏳ Checking...";
+      
+      try {
+        const response = await fetch("https://YOUR_BACKEND_URL/predict", {
+          method: "POST",
+          headers: { "Content-Type": "application/json" },
+          body: JSON.stringify({ text: message })
+        });
+        
+        const data = await response.json();
+        const { prediction, confidence } = data;
+        
+        if (prediction === "Phishing") {
+          resultDiv.innerHTML = `
+            <div class="result-card phishing">
+              🚨 <b>Phishing Detected!</b><br>
+              Confidence: ${confidence}%<br><br>
+              ⚠️ This message looks suspicious. Avoid clicking links or sharing personal info.
+            </div>
+          `;
+        } else {
+          resultDiv.innerHTML = `
+            <div class="result-card safe">
+              ✅ <b>Safe Message</b><br>
+              Confidence: ${confidence}%<br><br>
+              This message does not appear to be a phishing attempt.
+            </div>
+          `;
+        }
+      } catch (error) {
+        resultDiv.innerHTML = "❌ Error: Could not connect to backend.";
+      }
+    }
+  </script>
+</body>
+</html>
